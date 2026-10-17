@@ -35,7 +35,7 @@ Supported cities are defined in `app/Enums/City.php`: Prague, Paris and Berlin. 
 ## Installation
 
 ```bash
-git clone <repository-url> laravel-ai-booking-chatbot
+git clone https://github.com/rajtik76/laravel-ai-booking-chatbot.git
 cd laravel-ai-booking-chatbot
 composer setup
 ```
