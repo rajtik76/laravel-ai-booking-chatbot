@@ -1,58 +1,79 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel AI Booking Chatbot
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A hotel booking assistant built with Laravel, Livewire and the [Laravel AI SDK](https://github.com/laravel/ai). Guests ask about hotel availability in plain language and the assistant answers from real data in the database, using a tool call instead of guessing.
 
-## About Laravel
+## How it works
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Chat UI** (`resources/views/pages/⚡chat/`) - a Livewire single-file component served at `/`. It keeps the conversation history (last 40 messages), sends the browser's timezone along with each prompt and lets the guest start a new chat.
+- **Agent** (`app/Ai/Agents/BookingAssistant.php`) - a conversational agent running on Anthropic with the cheapest available model and up to 5 steps. It knows today's date in the guest's timezone and the list of supported cities, asks for missing details (city, check-in, check-out) and replies in the guest's language.
+- **Tool** (`app/Ai/Tools/FindAvailableHotels.php`) - validates the city and dates, then returns hotels whose availability windows cover every night of the requested stay. Overlapping or adjacent windows are merged, so a stay spanning two windows still matches.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Data model
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Table                  | Columns                                    |
+|------------------------|--------------------------------------------|
+| `hotels`               | `name`, `city` (`City` enum), `country` (`Country` enum) |
+| `hotel_availabilities` | `hotel_id`, `from`, `to` (inclusive dates) |
 
-## Learning Laravel
+Supported cities are defined in `app/Enums/City.php`: Prague, Paris and Berlin. Each city maps to its country.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Tech stack
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.4, Laravel 13
+- Laravel AI SDK (`laravel/ai`) with Anthropic as the provider
+- Livewire 4, Tailwind CSS 4, Vite
+- SQLite by default
+- Pest, Larastan, Pint
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Requirements
 
-## Agentic Development
+- PHP 8.3+
+- Composer
+- Node.js and npm
+- An Anthropic API key
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Installation
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <repository-url> laravel-ai-booking-chatbot
+cd laravel-ai-booking-chatbot
+composer setup
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+`composer setup` installs PHP and JS dependencies, creates `.env`, generates the app key, runs migrations and builds the frontend assets.
 
-## Contributing
+Add your API key to `.env`:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```dotenv
+ANTHROPIC_API_KEY=your-key
+```
 
-## Code of Conduct
+Seed the demo hotels (one per city, available from today until the end of next year):
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan db:seed
+```
 
-## Security Vulnerabilities
+## Running locally
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer dev
+```
+
+Then open the app in your browser and ask something like *"Is there a free hotel in Prague from next Friday to Sunday?"*
+
+## Testing and code quality
+
+```bash
+composer test        # Pest test suite (parallel)
+composer lint        # fix code style with Pint
+composer lint:check  # check code style without changes
+composer stan        # static analysis with Larastan
+composer review      # lint:check + stan + test
+```
+
+The tests cover the chat page, the availability tool and the model factories. AI calls are faked, so no API key is needed to run them.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT
