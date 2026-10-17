@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "rajtik76/laravel-ai-booking-chatbot",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Hotel booking chatbot built with Laravel, Livewire and the Laravel AI SDK.",
     "keywords": [
         "laravel",
         "framework"
@@ -10,11 +10,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "laravel/ai": "^1.2",
         "laravel/framework": "^13.17",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "livewire/livewire": "^4.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.0",
         "laravel/boost": "^2.2",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
@@ -51,7 +54,21 @@
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
-            "@php artisan test"
+            "@php artisan test --parallel"
+        ],
+        "lint:check": [
+            "./vendor/bin/pint --parallel --test"
+        ],
+        "lint": [
+            "./vendor/bin/pint --parallel"
+        ],
+        "stan": [
+            "./vendor/bin/phpstan analyze"
+        ],
+        "review": [
+            "@lint:check",
+            "@stan",
+            "@test"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

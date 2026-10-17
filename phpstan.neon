@@ -1,0 +1,22 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+
+parameters:
+
+    paths:
+        - app/
+        - database/
+        - routes/
+        - tests/
+
+    # Level 10 is the highest level
+    level: 8
+
+    parseModelCastsMethod: true
+
+#    ignoreErrors:
+#        - '#PHPDoc tag @var#'
+#
+#    excludePaths:
+#        - ./*/*/FileToBeExcluded.php
